@@ -7,8 +7,10 @@ from nhqm.problems import Helium5
 from nhqm.helpers.quantum import absq
 # from nhqm.helpers.plotting import find_resonance_state
 
-# Solves the He5 problem with the momentum basis,
-# then plots the ground state wavefunction
+'''
+ Solves the He5 problem with the momentum basis,
+ then plots the ground state wavefunction
+'''
 
 # Parameters
 l = 1
