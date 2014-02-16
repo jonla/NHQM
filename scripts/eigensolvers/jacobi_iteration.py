@@ -4,7 +4,7 @@ Created on 15 feb 2014
 @author: David Lidberg
 '''
 import numpy as np
-
+from timing import progress
 
 def jacobi_solver(A,b,N):
     '''Solves the system Ax=b with N iterations using the Jacobi
@@ -12,8 +12,8 @@ def jacobi_solver(A,b,N):
     iterations=N
     matrix_size=len(b)
     if (len(b) == len(A) == len(np.transpose(A))):
-          
-        
+
+
         D=np.eye(matrix_size)*np.diag(A)
         R=A-D
         x=np.random.random((matrix_size,1))
@@ -44,28 +44,28 @@ def given_gen(A,index):
     G[j,j]=c
     G[i,j]=s
     G[j,i]=-s
-    
+
     return G
 
 def jacobi_eigensolver(A,N):
     '''Finds eigenvalues of symmetric matrix A with N iterations using Jacobi
     rotation method'''
     tol=0.000001
-    for i in range(N):
+    for i in progress(range(N)):
         ind=offdiag_max(A)
         if abs(A[ind])<tol:
             break
             return A
         else:
-        
+
             given=given_gen(A,ind)
             A=np.transpose(given)*A*given
-        
+
     return A
-    
-        
-    
-    
+
+
+
+
 
 
 
