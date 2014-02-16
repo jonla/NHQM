@@ -61,7 +61,7 @@ def jacobi_eigensolver(A,N):
             given=given_gen(A,ind)
             A=np.transpose(given)*A*given
         
-    return A
+    return np.sort(np.diag(A))
     
         
     
