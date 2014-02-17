@@ -1,5 +1,5 @@
 import numpy as np
-from test import matrixgen
+from matrix import matrixgen
 from power import powersolve
 from jacobi_iteration import jacobi_eigensolver
 '''
