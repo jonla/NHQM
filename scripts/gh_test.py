@@ -7,7 +7,7 @@ from numpy import *
 from eigensolvers.largest import largestEig
 
 
-D = 100
+D = 1000
 
 B = random.rand(D,D)
 
