@@ -1,11 +1,11 @@
 '''
-Här skriver jag random skit... ibland står det nåt vettigt, oftast inte
+My random stuff... sometimes useful, most often not...
 '''
 
 from __future__ import division
 from numpy import * 
 
-def largestEig(A, its):
+def largestEig(A, its=10):
     "Finds largest eigenpair of matrix using power iterations"
 
     D = A.size**.5  # get size of input matrix
@@ -24,5 +24,5 @@ D = 100
 
 B = random.rand(D,D)
 
-print powersolve(B,10)
+print largestEig(B)
 print linalg.eig(B)
