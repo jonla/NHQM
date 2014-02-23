@@ -16,11 +16,7 @@ def davidsolver(A, guess, iterations, eps):
     V, M, theta, r = davidinit(A, guess)
     n = len(A)
     for m in range(iterations):
-        # This part is clearly not optimal.
-        # Here we are trying to use Davidson's preconditioner
-        # instad of the jacobi-davidson.
-        t = dot(np.linalg.inv(np.diag(A) * np.eye(n)
-                              - theta * np.eye(n)), r)
+        t = solvecorrectioneq(A, theta, r, n)
         for j in range(m):
             t = t - dot(dot(t, V[m - 1, :]), V[j, :])
         V = np.vstack((V, t / norm(t)))
@@ -46,3 +42,12 @@ def davidinit(A, guess):
     M = theta
     r = dot(A, V) - theta * V
     return V, M, theta, r
+
+
+def solvecorrectioneq(A, theta, r, n):
+    # This part is clearly not optimal.
+    # Here we are trying to use Davidson's preconditioner
+    # instad of the jacobi-davidson.
+    t = dot(np.linalg.inv(np.diag(A) * np.eye(n)
+                          - theta * np.eye(n)), r)
+    return t
