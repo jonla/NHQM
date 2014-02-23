@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import dot
 from largest import largestEig
+from numpy.linalg import norm
 
 
 def davidsolver(A, guess, iterations, eps):
@@ -12,28 +13,36 @@ def davidsolver(A, guess, iterations, eps):
         The norm of the residual is diverging.
     JL 19/2
     '''
-    t = guess
-    v = np.zeros((0, len(t)))
-    Mp = np.zeros((0, 0))
+    V, M, theta, r = davidinit(A, guess)
+    n = len(A)
     for m in range(iterations):
-        M = np.zeros((m + 1, m + 1))
-        M[0:m, 0:m] = Mp
-        for j in range(m - 1):
-            t = t + dot(dot(t, v[m - 1, :]), v[j, :])
-        v = np.vstack((v, t / np.linalg.norm(t)))
-        for i in range(m + 1):
-            M[i, m] = dot(v[i, :], dot(A, v[m, :]))
-        Mp = M
-        [theta, s] = largestEig(M, 10)
-        u = dot(np.transpose(v), s)
-        r = dot(A, u) - theta * u
-        f = np.linalg.norm(r)
-        print "Fel: ", f
-        if f < eps:
-            return theta, u
         # This part is clearly not optimal.
         # Here we are trying to use Davidson's preconditioner
         # instad of the jacobi-davidson.
-        t = dot(np.linalg.inv(np.diag(A) * np.eye(len(A))
-                              - theta * np.eye(len(A))), r)
+        t = dot(np.linalg.inv(np.diag(A) * np.eye(n)
+                              - theta * np.eye(n)), r)
+        for j in range(m):
+            t = t - dot(dot(t, V[m - 1, :]), V[j, :])
+        V = np.vstack((V, t / norm(t)))
+        print "V: ", V
+        Mp = M
+        M = np.zeros((m + 2, m + 2))
+        M[0:m + 1, 0:m + 1] = Mp
+        for i in range(m + 2):
+            M[i, m + 1] = dot(V[i, :], dot(A, V[m + 1, :]))
+        print "M: ", M
+        [theta, s] = largestEig(M, 10)
+        u = dot(np.transpose(V), s)
+        r = dot(A, u) - theta * u
+        f = norm(r)
+        if f < eps:
+            return theta, u
     return theta, u
+
+
+def davidinit(A, guess):
+    V = guess / norm(guess)
+    theta = dot(np.transpose(V), dot(A, V))
+    M = theta
+    r = dot(A, V) - theta * V
+    return V, M, theta, r

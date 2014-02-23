@@ -9,12 +9,16 @@ The resaults can be compared using numpys eig function.
 
 '''
 
-k = 50         # Matrix size
+k = 4         # Matrix size
 TOL = 1.e-1     # Margin of error
 D = 6           # Size of diagonal shape
-N = 500        # Number of iterations
+N = 4        # Number of iterations
 
-A = matrixgen(k, D)
+# A = matrixgen(k, D)
+A = np.array([[1, 2, 3, 4],
+              [0, 4, 2, 1],
+              [0, 0, 2, 1],
+              [0, 0, 0, 0.5]])
 
 # e, w = powersolve(A, TOL)
 # Pow = np.sort(e)
@@ -26,17 +30,18 @@ A = matrixgen(k, D)
 # print "Computed eigenvalues using Jacobi"
 # print Jac
 
-guess = np.random.rand(len(A))
+eig, vec = np.linalg.eig(A)
+Eig = np.sort(eig)
+guess = vec[1, :] + 0.1 * vec[2, :] + 0.2 * vec[3, :]
 theta, u = davidsolver(A, guess, N, TOL)
+
 print "Computed largest eigenpair using davidsolver:"
 print "Eigenvalue = ", theta
 print "Eigenvector:"
 print u
 
-eig, vec = np.linalg.eig(A)
-Eig = np.sort(eig)
-print "Computed eigenvalues using eig"
-print Eig
+print "Computed eigenvectors using eig"
+print vec
 
 # print "Standard error Power:", np.std(Eig - Pow)
 # print "Standard error Jacobi:", np.std(Eig - Jac)
