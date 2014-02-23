@@ -17,8 +17,7 @@ def davidsolver(A, guess, iterations, eps):
     n = len(A)
     for m in range(iterations):
         t = solvecorrectioneq(A, theta, r, n)
-        for j in range(m):
-            t = t - dot(dot(t, V[m - 1, :]), V[j, :])
+        t = modgramshmidt(t, V)
         V = np.vstack((V, t / norm(t)))
         print "V: ", V
         Mp = M
@@ -45,9 +44,27 @@ def davidinit(A, guess):
 
 
 def solvecorrectioneq(A, theta, r, n):
-    # This part is clearly not optimal.
-    # Here we are trying to use Davidson's preconditioner
-    # instad of the jacobi-davidson.
+    '''
+    This part is clearly not optimal.
+    Here we are trying to use Davidson's preconditioner
+    instad of the jacobi-davidson.
+    This is an exact, very costly solution
+    and should be replaced when we study larger
+    matrices.
+    '''
     t = dot(np.linalg.inv(np.diag(A) * np.eye(n)
                           - theta * np.eye(n)), r)
+    return t
+
+
+def modgramshmidt(tin, V, kappah=0.25):
+    t = tin
+    if len(V.shape) == 1:
+        t = t - dot(t, V) * V
+    else:
+        for j in range(len(V)):
+            t = t - dot(t, V[j, :]) * V[j, :]
+        if norm(t) / norm(tin) < kappah:
+            for j in range(len(V)):
+                t = t - dot(t, V[j, :]) * V[j, :]
     return t
