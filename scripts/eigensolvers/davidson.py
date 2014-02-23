@@ -19,17 +19,25 @@ def davidsolver(A, guess, iterations, eps):
         t = solvecorrectioneq(A, theta, r, n)
         t = modgramshmidt(t, V)
         V = np.vstack((V, t / norm(t)))
-        print "V: ", V
+        # print "V: ", V
         Mp = M
         M = np.zeros((m + 2, m + 2))
         M[0:m + 1, 0:m + 1] = Mp
         for i in range(m + 2):
             M[i, m + 1] = dot(V[i, :], dot(A, V[m + 1, :]))
         print "M: ", M
+        '''
+        M upper triangular -> eigenvalues on diagonal
+        -> theta = max(diag(M)), ie theta is 'known'.
+        Thus there should be an easier way to calculate s
+        through solving (M - theta*I)*s = 0.
+        '''
         [theta, s] = largestEig(M, 10)
+        print "theta: ", theta
         u = dot(np.transpose(V), s)
         r = dot(A, u) - theta * u
         f = norm(r)
+        print "f: ", f
         if f < eps:
             return theta, u
     return theta, u
