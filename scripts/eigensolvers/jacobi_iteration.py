@@ -6,7 +6,7 @@ Created on 15 feb 2014
 import numpy as np
 from timing import progress
 
-def jacobi_solver(A,b,N):
+def jacobi_solver(A,b,guess,N):
     '''Solves the system Ax=b with N iterations using the Jacobi
      iteration method'''
     iterations=N
@@ -16,7 +16,7 @@ def jacobi_solver(A,b,N):
 
         D=np.eye(matrix_size)*np.diag(A)
         R=A-D
-        x=np.random.random((matrix_size,1))
+        x=guess
         for i in range(iterations):
             x=np.dot(np.linalg.inv(D),(b-np.dot(R,x)))
         return x
@@ -47,9 +47,10 @@ def given_gen(A,index):
 
     return G
 
-def jacobi_eigensolver(A,N):
+def jacobi_eigensolver(Ain,N):
     '''Finds eigenvalues of symmetric matrix A with N iterations using Jacobi
     rotation method'''
+    A=np.asarray(Ain)
     tol=0.000001
     for i in progress(range(N)):
         ind=offdiag_max(A)
@@ -62,6 +63,18 @@ def jacobi_eigensolver(A,N):
             A=np.transpose(given)*A*given
     return np.sort(np.diag(A))
 
+def jacobi_rot(Ain,dom):
+    A=np.asmatrix(Ain)
+    dominance=0
+    ind=offdiag_max(A)
+    while (dominance<dom):
+        given=given_gen(A,ind)
+        A=np.transpose(given)*A*given
+        ind=offdiag_max(A)
+        dominance=abs(A[0,0]/A[ind])
+        
+    return A
+        
 
 
 
