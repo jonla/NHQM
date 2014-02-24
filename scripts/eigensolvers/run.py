@@ -14,11 +14,7 @@ TOL = 1.e-1     # Margin of error
 D = 6           # Size of diagonal shape
 N = 4        # Number of iterations
 
-# A = matrixgen(k, D)
-A = np.array([[1, 2, 3, 4],
-              [0, 4, 2, 1],
-              [0, 0, 2, 1],
-              [0, 0, 0, 0.5]])
+A = matrixgen(k, D)
 
 # e, w = powersolve(A, TOL)
 # Pow = np.sort(e)
@@ -37,11 +33,11 @@ theta, u = davidsolver(A, guess, N, TOL)
 
 print "Computed largest eigenpair using davidsolver:"
 print "Eigenvalue = ", theta
-print "Eigenvector:"
-print u
+# print "Eigenvector:"
+# print u
 
 print "Computed eigenvectors using eig"
-print vec
+print Eig[k - 1]
 
 # print "Standard error Power:", np.std(Eig - Pow)
 # print "Standard error Jacobi:", np.std(Eig - Jac)
