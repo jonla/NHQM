@@ -2,6 +2,7 @@ import numpy as np
 from numpy import dot
 from largest import largestEig
 from numpy.linalg import norm
+from matrix import realsymmetric
 
 
 def davidsolver(A, guess, iterations, eps):
@@ -9,9 +10,10 @@ def davidsolver(A, guess, iterations, eps):
     This function is meant to solve compute the
     largest eigenvalue to A with corresponding eigenvector.
 
-    ERRORS:
-        The norm of the residual is diverging.
-    JL 19/2
+    TODO:
+        * Implement the correction equation with suitable
+        solving method and preconditioner.
+        * Implement a new eigensolving algorithm for M.
     '''
     V, M, theta, r = davidinit(A, guess)
     n = len(A)
@@ -25,19 +27,15 @@ def davidsolver(A, guess, iterations, eps):
         M[0:m + 1, 0:m + 1] = Mp
         for i in range(m + 2):
             M[i, m + 1] = dot(V[i, :], dot(A, V[m + 1, :]))
-        print "M: ", M
+            M[m + 1, i] = dot(V[m + 1, :], dot(A, V[i, :]))
         '''
-        M upper triangular -> eigenvalues on diagonal
-        -> theta = max(diag(M)), ie theta is 'known'.
-        Thus there should be an easier way to calculate s
-        through solving (M - theta*I)*s = 0.
+        We need to implement a better/faster method than power
+        iterations in the long run.
         '''
-        [theta, s] = largestEig(M, 10)
-        print "theta: ", theta
+        theta, s = largestEig(M, 100)
         u = dot(np.transpose(V), s)
         r = dot(A, u) - theta * u
         f = norm(r)
-        print "f: ", f
         if f < eps:
             return theta, u
     return theta, u
@@ -76,3 +74,25 @@ def modgramshmidt(tin, V, kappah=0.25):
             for j in range(len(V)):
                 t = t - dot(t, V[j, :]) * V[j, :]
     return t
+
+
+k = 100                     # Matrix size
+TOL = 1.e-3                 # Margin of error
+D = 100                     # Diagonal shape
+N = 60                      # Iterations
+
+A = realsymmetric(k, D)
+
+eig, vec = np.linalg.eig(A)
+Eig = np.sort(eig)
+
+guess = np.random.rand(k)
+theta, u = davidsolver(A, guess, N, TOL)
+
+print "Computed largest eigenvalue davidsolver:"
+print "Eigenvalue = ", theta
+# print "Eigenvector:"
+# print u
+
+print "Computed smallest and largest using eig"
+print Eig[k - 1], ", ", Eig[0]
