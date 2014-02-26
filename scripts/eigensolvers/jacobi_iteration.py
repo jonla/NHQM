@@ -6,17 +6,18 @@ Created on 15 feb 2014
 import numpy as np
 from timing import progress
 
-def jacobi_solver(A,b,guess,N):
+def jacobi_solver(A,b,N):
     '''Solves the system Ax=b with N iterations using the Jacobi
      iteration method'''
     iterations=N
     matrix_size=len(b)
+    
     if (len(b) == len(A) == len(np.transpose(A))):
 
 
         D=np.eye(matrix_size)*np.diag(A)
         R=A-D
-        x=guess
+        x=np.zeros(len(b))
         for i in range(iterations):
             x=np.dot(np.linalg.inv(D),(b-np.dot(R,x)))
         return x

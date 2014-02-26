@@ -14,4 +14,4 @@ def largestEig(A, its = 10):
     
     theta = linalg.norm(dot(A,v))
     
-    return [theta, v]
+    return theta, v

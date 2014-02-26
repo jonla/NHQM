@@ -3,6 +3,9 @@ from matrix import matrixgen
 from power import powersolve
 from jacobi_iteration import jacobi_eigensolver
 from davidson import davidsolver
+from jacobi_iteration import jacobi_rot
+from JOCC import JOCC
+import timeit
 '''
 This script is used to test different eigensolvers.
 The resaults can be compared using numpys eig function.
@@ -61,7 +64,7 @@ print Jac[0]
 
 eig, vec= np.linalg.eig(A)
 Eig = np.sort(eig)
-<<<<<<< HEAD
+
 
 print "Computed eigenvalues using eig"
 print Eig[0]

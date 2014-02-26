@@ -67,7 +67,7 @@ def solvecorrectioneq(A, theta, r, n):
 
 def modgramshmidt(tin, V, kappah=0.25):
     t = tin
-    if len(V.shape) == 1:
+    if len(V.shape) == 1 or len(V[0,:]) == 1:
         t = t - dot(t, V) * V
     else:
         for j in range(len(V)):
