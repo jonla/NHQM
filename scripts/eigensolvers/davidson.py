@@ -2,6 +2,7 @@ import numpy as np
 from numpy import dot
 from largest import largestEig
 from numpy.linalg import norm
+from matrix import realsymmetric
 
 
 def davidsolver(A, guess, iterations, eps):
@@ -31,7 +32,7 @@ def davidsolver(A, guess, iterations, eps):
         We need to implement a better/faster method than power
         iterations in the long run.
         '''
-        [theta, s] = largestEig(M, 10)
+        theta, s = largestEig(M, 100)
         u = dot(np.transpose(V), s)
         r = dot(A, u) - theta * u
         f = norm(r)
@@ -73,3 +74,25 @@ def modgramshmidt(tin, V, kappah=0.25):
             for j in range(len(V)):
                 t = t - dot(t, V[j, :]) * V[j, :]
     return t
+
+
+k = 100                     # Matrix size
+TOL = 1.e-3                 # Margin of error
+D = 100                     # Diagonal shape
+N = 60                      # Iterations
+
+A = realsymmetric(k, D)
+
+eig, vec = np.linalg.eig(A)
+Eig = np.sort(eig)
+
+guess = np.random.rand(k)
+theta, u = davidsolver(A, guess, N, TOL)
+
+print "Computed largest eigenvalue davidsolver:"
+print "Eigenvalue = ", theta
+# print "Eigenvector:"
+# print u
+
+print "Computed smallest and largest using eig"
+print Eig[k - 1], ", ", Eig[0]

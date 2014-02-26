@@ -4,9 +4,8 @@ from power import powersolve
 from jacobi_iteration import jacobi_eigensolver
 from davidson import davidsolver
 '''
-This script is used to test different eigensolvers.
-The resaults can be compared using numpys eig function.
-
+This script is old and should be phased out. Any testing should be done as
+a separeate script in each method file.
 '''
 
 k = 4         # Matrix size
