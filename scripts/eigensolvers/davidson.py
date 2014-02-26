@@ -76,23 +76,24 @@ def modgramshmidt(tin, V, kappah=0.25):
     return t
 
 
-k = 100                     # Matrix size
-TOL = 1.e-3                 # Margin of error
-D = 100                     # Diagonal shape
-N = 60                      # Iterations
+def davidsontest():
+    k = 100                     # Matrix size
+    TOL = 1.e-3                 # Margin of error
+    D = 100                     # Diagonal shape
+    N = 60                      # Iterations
 
-A = realsymmetric(k, D)
+    A = realsymmetric(k, D)
 
-eig, vec = np.linalg.eig(A)
-Eig = np.sort(eig)
+    eig, vec = np.linalg.eig(A)
+    Eig = np.sort(eig)
 
-guess = np.random.rand(k)
-theta, u = davidsolver(A, guess, N, TOL)
+    guess = np.random.rand(k)
+    theta, u = davidsolver(A, guess, N, TOL)
 
-print "Computed largest eigenvalue davidsolver:"
-print "Eigenvalue = ", theta
-# print "Eigenvector:"
-# print u
+    print "Computed largest eigenvalue davidsolver:"
+    print "Eigenvalue = ", theta
+    # print "Eigenvector:"
+    # print u
 
-print "Computed smallest and largest using eig"
-print Eig[k - 1], ", ", Eig[0]
+    print "Computed smallest and largest using eig"
+    print Eig[k - 1], ", ", Eig[0]
