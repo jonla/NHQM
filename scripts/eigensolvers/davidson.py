@@ -17,8 +17,9 @@ def davidsolver(A, guess, iterations, eps):
     '''
     V, M, theta, r = davidinit(A, guess)
     n = len(A)
+    u = V
     for m in range(iterations):
-        t = solvecorrectioneq(A, theta, r, n)
+        t = solvecorrectioneq(A, u, theta, r, n)
         vplus = modgramshmidt(t, V)
         M = np.vstack([np.hstack([M, dot(V.T, dot(A, vplus))]),
                        np.hstack([dot(vplus.T, dot(A, V)),
@@ -35,6 +36,7 @@ def davidsolver(A, guess, iterations, eps):
         u = dot(V, s)
         r = dot(A, u) - theta * u
         f = norm(r)
+        print "Iteration:", m, " Theta:", theta, " f:", f
         if f < eps:
             return theta, u
     return theta, u
@@ -48,7 +50,7 @@ def davidinit(A, guess):
     return V, M, theta, r
 
 
-def solvecorrectioneq(A, theta, r, n):
+def solvecorrectioneq(A, u, theta, r, n):
     '''
     This part is clearly not optimal.
     Here we are trying to use Davidson's preconditioner
@@ -57,7 +59,11 @@ def solvecorrectioneq(A, theta, r, n):
     and should be replaced when we study larger
     matrices.
     '''
-    t = np.linalg.solve(np.diag(A) * np.eye(n) - theta * np.eye(n), -r)
+    # t = np.linalg.solve(np.diag(A) * np.eye(n) - theta * np.eye(n), -r)
+    K = dot(np.eye(n) - np.outer(u, u), dot(A - theta * np.eye(n),
+                                            np.eye(n) - np.outer(u, u)))
+    K = np.vstack([K, 100 * u.T])   # lstsq weight 100 for u * t = 0
+    t = np.linalg.lstsq(K, np.vstack([-r, 0]))[0]
     return t
 
 
@@ -92,7 +98,8 @@ def davidsontest():
     Eig = np.sort(eig)
 
     # guess = np.random.rand(k, 1)
-    guess = np.ones((k, 1))
+    # guess = np.ones((k, 1))
+    guess = vec[:, [0]] + 0.1 * np.ones((k, 1))
     theta, u = davidsolver(A, guess, N, TOL)
 
     print "Computed largest eigenvalue davidsolver:"
@@ -102,3 +109,5 @@ def davidsontest():
 
     print "Computed smallest and largest using eig"
     print Eig[-1], ", ", Eig[0]
+
+    print "Guess'*Vmax:", dot((guess / norm(guess)).T, vec[:, [0]])
