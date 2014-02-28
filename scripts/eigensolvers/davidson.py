@@ -3,6 +3,7 @@ from numpy import dot
 # from largest import largestEig
 from numpy.linalg import norm
 from matrix import realsymmetric
+import time
 
 
 def davidsolver(A, guess, iterations, eps):
@@ -15,10 +16,18 @@ def davidsolver(A, guess, iterations, eps):
         solving method and preconditioner.
         * Implement a new eigensolving algorithm for M.
     '''
+    # Timing stuff
+    startsolver = time.time()
+    timeCEQ = 0
+
     V, M, theta, r = davidinit(A, guess)
+    theta1 = theta
     n = len(A)
+    u = V
     for m in range(iterations):
-        t = solvecorrectioneq(A, theta, r, n)
+        startCEQ = time.time()
+        t = solvecorrectioneq(A, u, theta, r, n)
+        timeCEQ = timeCEQ + time.time() - startCEQ
         vplus = modgramshmidt(t, V)
         M = np.vstack([np.hstack([M, dot(V.T, dot(A, vplus))]),
                        np.hstack([dot(vplus.T, dot(A, V)),
@@ -30,13 +39,20 @@ def davidsolver(A, guess, iterations, eps):
         '''
         # theta, s = largestEig(M, 100)
         evals, evecs = np.linalg.eig(M)
-        theta = evals[0]
-        s = evecs[:, [0]]
+        thetai = abs(evals - theta1).argmin()
+        # thetai = evals.argmax()
+        theta = evals[thetai]
+        s = evecs[:, [thetai]]
         u = dot(V, s)
         r = dot(A, u) - theta * u
         f = norm(r)
+        print "Iteration:", m, " Theta:", theta, " norm(r):", f
         if f < eps:
+            print "Total time:", (time.time() - startsolver)
+            print "time on CEQ:", (timeCEQ / (time.time() - startsolver))
             return theta, u
+    print "Total time:", (time.time() - startsolver)
+    print "time on CEQ:", (timeCEQ / (time.time() - startsolver))
     return theta, u
 
 
@@ -48,16 +64,21 @@ def davidinit(A, guess):
     return V, M, theta, r
 
 
-def solvecorrectioneq(A, theta, r, n):
+def solvecorrectioneq(A, u, theta, r, n):
     '''
-    This part is clearly not optimal.
-    Here we are trying to use Davidson's preconditioner
-    instad of the jacobi-davidson.
-    This is an exact, very costly solution
+    This is a very costly solution
     and should be replaced when we study larger
-    matrices.
+    matrices. The method we should use relies on finding a suitable
+    preconditioner to (A-theta*I) and then the iterativ method GMRES.
     '''
-    t = np.linalg.solve(np.diag(A) * np.eye(n) - theta * np.eye(n), -r)
+    # Davidson's suggested correction equation
+    # t = np.linalg.solve(np.diag(A) * np.eye(n) - theta * np.eye(n), -r)
+
+    # The JD correction equation
+    K = dot(np.eye(n) - np.outer(u, u), dot(A - theta * np.eye(n),
+                                            np.eye(n) - np.outer(u, u)))
+    K = np.vstack([K, 100 * u.T])   # lstsq weight 100 for u * t = 0
+    t = np.linalg.lstsq(K, np.vstack([-r, 0]))[0]
     return t
 
 
@@ -95,15 +116,26 @@ def davidsontest():
     #               [5, 6, 7, -8, 9]])
     eig, vec = np.linalg.eig(A)
     Eig = np.sort(eig)
+    target = 18 # = eig.argmax()
+    eigmax = eig[target]
+    vmax = vec[:, [target]]
 
     # guess = np.random.rand(k, 1)
-    guess = np.ones((k, 1))
+    # guess = np.ones((k, 1))
+    guess = vmax + 0.10 * np.ones((k, 1))
+    guess = guess / norm(guess)
+    print "Matrix size:", k
+    print "Target eigenvalue:", eigmax
+    print "Guess'*Vmax:", dot(guess.T, vmax)
+    theta1 = dot(guess.T, dot(A, guess))
+    print "Theta 1:", theta1
     theta, u = davidsolver(A, guess, N, TOL)
 
-    print "Computed largest eigenvalue davidsolver:"
-    print "Eigenvalue = ", theta
-    # print "Eigenvector:"
-    # print u
-
-    print "Computed smallest and largest using eig"
+    print "RESULTING EIGENVALUE:", theta
+    neari = abs(eig - theta1).argmin()
+    neareig = eig[neari]
+    nearvec = vec[:,[neari]]
+    print "Nearest eigenvalue:", neareig
+    print "Guess*nearest:", dot(nearvec.T, guess)
+    print "Computed smallest and largest using eig:"
     print Eig[-1], ", ", Eig[0]
