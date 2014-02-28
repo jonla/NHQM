@@ -1,6 +1,6 @@
 import numpy as np
 from numpy import dot
-from largest import largestEig
+# from largest import largestEig
 from numpy.linalg import norm
 from matrix import realsymmetric
 
@@ -19,21 +19,20 @@ def davidsolver(A, guess, iterations, eps):
     n = len(A)
     for m in range(iterations):
         t = solvecorrectioneq(A, theta, r, n)
-        t = modgramshmidt(t, V)
-        V = np.vstack((V, t / norm(t)))
-        # print "V: ", V
-        Mp = M
-        M = np.zeros((m + 2, m + 2))
-        M[0:m + 1, 0:m + 1] = Mp
-        for i in range(m + 2):
-            M[i, m + 1] = dot(V[i, :], dot(A, V[m + 1, :]))
-            M[m + 1, i] = dot(V[m + 1, :], dot(A, V[i, :]))
+        vplus = modgramshmidt(t, V)
+        M = np.vstack([np.hstack([M, dot(V.T, dot(A, vplus))]),
+                       np.hstack([dot(vplus.T, dot(A, V)),
+                                  dot(vplus.T, dot(A, vplus))])])
+        V = np.hstack((V, vplus))
         '''
         We need to implement a better/faster method than power
         iterations in the long run.
         '''
-        theta, s = largestEig(M, 100)
-        u = dot(np.transpose(V), s)
+        # theta, s = largestEig(M, 100)
+        evals, evecs = np.linalg.eig(M)
+        theta = evals[0]
+        s = evecs[:, [0]]
+        u = dot(V, s)
         r = dot(A, u) - theta * u
         f = norm(r)
         if f < eps:
@@ -43,7 +42,7 @@ def davidsolver(A, guess, iterations, eps):
 
 def davidinit(A, guess):
     V = guess / norm(guess)
-    theta = dot(np.transpose(V), dot(A, V))
+    theta = dot(V.T, dot(A, V))
     M = theta
     r = dot(A, V) - theta * V
     return V, M, theta, r
@@ -58,41 +57,53 @@ def solvecorrectioneq(A, theta, r, n):
     and should be replaced when we study larger
     matrices.
     '''
-    t = dot(np.linalg.inv(np.diag(A) * np.eye(n)
-                          - theta * np.eye(n)), r)
+    t = np.linalg.solve(np.diag(A) * np.eye(n) - theta * np.eye(n), -r)
     return t
 
 
 def modgramshmidt(tin, V, kappah=0.25):
     t = tin
+<<<<<<< HEAD
     if len(V.shape) == 1 or len(V[0,:]) == 1:
         t = t - dot(t, V) * V
+=======
+    if len(V[1]) == 1:
+        t = t - dot(t.T, V) * V
+>>>>>>> 07f9794a722db6f03e5f430a816f53f2a1c68914
     else:
-        for j in range(len(V)):
-            t = t - dot(t, V[j, :]) * V[j, :]
+        for j in range(len(V.T)):
+            # print "dot(t.T, V[:, [j]]): ", dot(t.T, V[:, [j]])
+            t = t - dot(t.T, V[:, [j]]) * V[:, [j]]
+            # print "t.shape", t.shape
         if norm(t) / norm(tin) < kappah:
-            for j in range(len(V)):
-                t = t - dot(t, V[j, :]) * V[j, :]
-    return t
+            for j in range(len(V.T)):
+                t = t - dot(t.T, V[:, [j]]) * V[:, [j]]
+    return t / norm(t)
 
 
-k = 100                     # Matrix size
-TOL = 1.e-3                 # Margin of error
-D = 100                     # Diagonal shape
-N = 60                      # Iterations
+def davidsontest():
+    k = 100                     # Matrix size
+    TOL = 1.e-3                 # Margin of error
+    D = 100                     # Diagonal shape
+    N = 45                      # Iterations
 
-A = realsymmetric(k, D)
+    A = realsymmetric(k, D)
+    # A = np.array([[1, 2, -3, 4, 5],
+    #               [2, 3, 4, 5, 6],
+    #               [-3, 4, 5, -6, 7],
+    #               [4, 5, -6, 7, -8],
+    #               [5, 6, 7, -8, 9]])
+    eig, vec = np.linalg.eig(A)
+    Eig = np.sort(eig)
 
-eig, vec = np.linalg.eig(A)
-Eig = np.sort(eig)
+    # guess = np.random.rand(k, 1)
+    guess = np.ones((k, 1))
+    theta, u = davidsolver(A, guess, N, TOL)
 
-guess = np.random.rand(k)
-theta, u = davidsolver(A, guess, N, TOL)
+    print "Computed largest eigenvalue davidsolver:"
+    print "Eigenvalue = ", theta
+    # print "Eigenvector:"
+    # print u
 
-print "Computed largest eigenvalue davidsolver:"
-print "Eigenvalue = ", theta
-# print "Eigenvector:"
-# print u
-
-print "Computed smallest and largest using eig"
-print Eig[k - 1], ", ", Eig[0]
+    print "Computed smallest and largest using eig"
+    print Eig[-1], ", ", Eig[0]

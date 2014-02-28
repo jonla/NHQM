@@ -1,4 +1,11 @@
 import numpy as np
+'''
+Maybe we should consider remaking these functions to, lets say
+- realsymmetric
+- complexsymmtric (hermitian, A[i,j]=conj(A[j,i)])
+- nonhermitian (complex symmetric, A[i,j]=A[j,i])
+and making the random values: -1 < rand < 1
+'''
 
 
 def realsymmetric(k, D):
@@ -17,7 +24,7 @@ def realsymmetric(k, D):
 def complexsymmetric(k, D):
     ''' Creates a k by k sized symmetric complex matrix
     with D non-zero elements on each row'''
-    A = np.zeros((k, k), dtype = complex)
+    A = np.zeros((k, k), dtype=complex)
 
     for i in xrange(k):
         for j in xrange(i + 1):
