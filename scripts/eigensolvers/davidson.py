@@ -83,7 +83,7 @@ def modgramshmidt(tin, V, kappah=0.25):
 
 
 def davidsontest():
-    k = 100                     # Matrix size
+    k = 1000                     # Matrix size
     TOL = 1.e-3                 # Margin of error
     D = 100                     # Diagonal shape
     N = 45                      # Iterations
@@ -104,10 +104,9 @@ def davidsontest():
 
     print "Computed largest eigenvalue davidsolver:"
     print "Eigenvalue = ", theta
-    # print "Eigenvector:"
-    # print u
 
     print "Computed smallest and largest using eig"
     print Eig[-1], ", ", Eig[0]
 
+    print "Target eigenvalue:", eig[0]
     print "Guess'*Vmax:", dot((guess / norm(guess)).T, vec[:, [0]])
