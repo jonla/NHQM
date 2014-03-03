@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import dot
+import matplotlib.pyplot as plt
 # from largest import largestEig
 from numpy.linalg import norm
 from matrix import realsymmetric, complexsymmetric, complexhermitian
@@ -110,7 +111,7 @@ def davidsontest():
     #               [5, 6, 7, -8, 9]])
     eig, vec = np.linalg.eig(A)
     Eig = np.sort(eig)
-    target = 18 # = eig.argmax()
+    target = 18  # = eig.argmax()
     eigmax = eig[target]
     vmax = vec[:, [target]]
 
@@ -128,7 +129,7 @@ def davidsontest():
     print "RESULTING EIGENVALUE:", theta
     neari = abs(eig - theta1).argmin()
     neareig = eig[neari]
-    nearvec = vec[:,[neari]]
+    nearvec = vec[:, [neari]]
     print "Nearest eigenvalue to Theta 1:", neareig
     print "Guess*nearest:", dot(nearvec.T, guess)
     print "Computed smallest and largest using eig:"
