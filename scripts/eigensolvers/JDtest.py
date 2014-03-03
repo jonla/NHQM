@@ -3,31 +3,67 @@ Created on 27 feb 2014
 
 @author: David Lidberg
 '''
+
+
 import numpy as np
-
-
 from Jacobi_Davidson import *
-from matrix import realsymmetric
-N=5
-B = realsymmetric(N,N)
-A = np.asmatrix([ [0.2202,    0.1117,    0.1519,    0.0432,    0.0712],
-    [0.1117,    0.5514,   -0.2560,    0.1716,   -0.0654],
-    [0.1519,   -0.2560,   -0.6452,    0.7342,   -0.3321],
-    [0.0432,    0.1716,    0.7342,   -0.7026,   -0.1678],
-    [0.0712,   -0.0654,   -0.3321,   -0.1678,   -0.0926] ])
-print type(A)
-print type(B)
+from matrix import *
 
+
+
+'''
+Tests for Jacobi_Davidson.py
+ISSUES: Less accurate than the matlab version, can't tell why.
+        Sometimes the found state is somehow reversed, as if a
+        factor of -1 has appeared.
+
+'''
+
+
+
+matrix_size = 100 
+which_state = 80
+error_size = 0.08
+print "Target eigenpair:", which_state
+
+A = realsymmetric(matrix_size,matrix_size)
 eig,vec = np.linalg.eig(A)
-
-guess = np.transpose(np.asmatrix(vec[:,0]))+0.15*np.random.random((N,1))
-error= np.linalg.norm(guess-np.transpose(np.asmatrix(vec[:,0])))
-guess2 = np.asmatrix(np.random.random((N,1)))
-alpha=np.dot(np.transpose(guess),np.dot(A,guess))
-print alpha
-print "error guess:", error
-theta, e=JD(A,guess)
+print "Desired eigenvalue:", eig[which_state]
 
 
-print "JD:", theta
-print "Numpy:", eig
+'''Creates initial vector'''
+sought_state = vec[:,[which_state]]
+sought_value = eig[which_state]
+error = error_size*np.ones((matrix_size,1))
+guess = sought_state+error
+guess_acc = abs(np.dot(np.transpose(sought_state),guess))
+print "Guess accuracy:", guess_acc
+
+'''Runs JD'''
+theta, e, theta_hist, res_hist, count = JD(A,guess,"state")
+print "Completed iterations:", count
+print "Found eigenvalue:", theta
+
+'''Checks overlap'''
+overlap = np.zeros((matrix_size,1))
+for m in range(matrix_size):
+    overlap[m,0] = abs(np.dot(np.transpose(vec[:,[m]]),e))
+max_overlap_ind = np.argmax(overlap)
+found_overlap = vec[:,[max_overlap_ind]]
+print "Found state has largest overlap with eigenvector", max_overlap_ind
+print "Overlap:", overlap[max_overlap_ind,0]
+    
+
+
+plt.figure(1)
+reshist_plot(res_hist,count)
+
+
+plt.figure(2)
+thetahist_plot(theta_hist,count)
+
+plt.figure(3)
+plt.plot(e, label="Found state")
+plt.plot(sought_state, label="Desired state", color="red")
+plt.legend()
+plt.show()
