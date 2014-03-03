@@ -1,11 +1,7 @@
+from __future__ import division
 import numpy as np
-'''
-Maybe we should consider remaking these functions to, lets say
-- realsymmetric
-- complexsymmtric (hermitian, A[i,j]=conj(A[j,i)])
-- nonhermitian (complex symmetric, A[i,j]=A[j,i])
-and making the random values: -1 < rand < 1
-'''
+# from nhqm.bases.momentum import MomentumBasis, gauss_contour, triangle_contour
+# from nhqm.problems import Helium5
 
 
 def realsymmetric(k, D):
@@ -21,6 +17,21 @@ def realsymmetric(k, D):
     return A
 
 
+def complexhermitian(k, D):
+    ''' Creates a k by k sized symmetric complex matrix
+    with D non-zero elements on each row'''
+    A = np.zeros((k, k), dtype=complex)
+
+    for i in xrange(k):
+        A[i, i] = 2 * np.random.rand(1) - 1
+        for j in xrange(i):
+            if np.abs(i - j) < D:
+                A[i, j:j + 1] = (2 * np.random.rand(1) - 1
+                        + 2 * np.random.rand(1) * 1j + 1j)
+                A[j, i] = np.conj(A[i, j])
+    return A
+
+
 def complexsymmetric(k, D):
     ''' Creates a k by k sized symmetric complex matrix
     with D non-zero elements on each row'''
@@ -29,7 +40,8 @@ def complexsymmetric(k, D):
     for i in xrange(k):
         for j in xrange(i + 1):
             if np.abs(i - j) < D:
-                A[i, j:j + 1] = np.random.rand(1) + np.random.rand(1) * 1j
+                A[i, j:j + 1] = (2 * np.random.rand(1) - 1
+                        + 2 * np.random.rand(1) * 1j + 1j)
                 A[j, i] = A[i, j]
     return A
 
@@ -47,3 +59,14 @@ def matrixgen(k, D):
                 A[i, j] = np.random.rand(1)
                 A[j, i] = A[i, j]
     return A
+
+
+def helium5berggrenmatrix(x_peak=0.17, y_peak=-0.07, basis_state_count=30,
+        k_max=30):
+    problem = Helium5()
+
+    # Bases and contours
+    berg_contour = triangle_contour(x_peak, y_peak, k_max, basis_state_count, 5)
+    berg = MomentumBasis(berg_contour)
+
+    return berg.hamiltonian(problem, quantum_numbers)
