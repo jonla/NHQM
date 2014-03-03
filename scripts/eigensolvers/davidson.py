@@ -2,19 +2,19 @@ import numpy as np
 from numpy import dot
 # from largest import largestEig
 from numpy.linalg import norm
-from matrix import realsymmetric
+from matrix import realsymmetric, complexsymmetric, complexhermitian
 import time
 
 
 def davidsolver(A, guess, iterations, eps):
     '''
-    This function is meant to solve compute the
-    largest eigenvalue to A with corresponding eigenvector.
+    This function is meant to compute the eigenpair with eigenvector
+    close to the initial guess.
 
     TODO:
-        * Implement the correction equation with suitable
-        solving method and preconditioner.
-        * Implement a new eigensolving algorithm for M.
+        * Modify the correction equation to use a suitable
+        solver (GMRES) with a preconditioner (?).
+        * Maybe implement a new eigensolving algorithm for M.
     '''
     # Timing stuff
     startsolver = time.time()
@@ -41,8 +41,13 @@ def davidsolver(A, guess, iterations, eps):
         '''
         # theta, s = largestEig(M, 100)
         evals, evecs = np.linalg.eig(M)
+
         #thetai = abs(evals - theta1).argmin()
         thetai = evals.argmax()
+
+        # thetai = abs(evals - theta1).argmin()
+        thetai = abs(evals).argmax()
+
         theta = evals[thetai]
         s = evecs[:, [thetai]]
         u = dot(V, s)
@@ -96,9 +101,7 @@ def modgramshmidt(tin, V, kappah=0.25):
 
     else:
         for j in range(len(V.T)):
-            # print "dot(t.T, V[:, [j]]): ", dot(t.T, V[:, [j]])
             t = t - dot(t.T, V[:, [j]]) * V[:, [j]]
-            # print "t.shape", t.shape
         if norm(t) / norm(tin) < kappah:
             for j in range(len(V.T)):
                 t = t - dot(t.T, V[:, [j]]) * V[:, [j]]
@@ -106,10 +109,15 @@ def modgramshmidt(tin, V, kappah=0.25):
 
 
 def davidsontest():
+
     k = 5                     # Matrix size
+
+    k = 500                     # Matrix size
+
     TOL = 1.e-3                 # Margin of error
     D = 5                     # Diagonal shape
     N = 45                      # Iterations
+    guessoffset = 0.035
 
     A = realsymmetric(k, D)
     # A = np.array([[1, 2, -3, 4, 5],
@@ -125,7 +133,11 @@ def davidsontest():
 
     # guess = np.random.rand(k, 1)
     # guess = np.ones((k, 1))
+
     guess = vmax + 0.07 * np.ones((k, 1))
+
+    guess = vmax + guessoffset * np.ones((k, 1))
+
     guess = guess / norm(guess)
     print "Matrix size:", k
     print "Target eigenvalue:", eigmax
@@ -138,7 +150,7 @@ def davidsontest():
     neari = abs(eig - theta1).argmin()
     neareig = eig[neari]
     nearvec = vec[:,[neari]]
-    print "Nearest eigenvalue:", neareig
+    print "Nearest eigenvalue to Theta 1:", neareig
     print "Guess*nearest:", dot(nearvec.T, guess)
     print "Computed smallest and largest using eig:"
     print Eig[-1], ", ", Eig[0]
