@@ -20,7 +20,8 @@ def davidsolver(A, guess, iterations, eps):
     startsolver = time.time()
     timeCEQ = 0
 
-    V, M, theta, r = davidinit(A, guess)
+    V, M, theta, r, iterations = davidinit(A, guess)
+    
     theta1 = theta
     n = len(A)
     u = V
@@ -32,6 +33,7 @@ def davidsolver(A, guess, iterations, eps):
         M = np.vstack([np.hstack([M, dot(V.T, dot(A, vplus))]),
                        np.hstack([dot(vplus.T, dot(A, V)),
                                   dot(vplus.T, dot(A, vplus))])])
+        
         V = np.hstack((V, vplus))
         '''
         We need to implement a better/faster method than power
@@ -39,8 +41,8 @@ def davidsolver(A, guess, iterations, eps):
         '''
         # theta, s = largestEig(M, 100)
         evals, evecs = np.linalg.eig(M)
-        thetai = abs(evals - theta1).argmin()
-        # thetai = evals.argmax()
+        #thetai = abs(evals - theta1).argmin()
+        thetai = evals.argmax()
         theta = evals[thetai]
         s = evecs[:, [thetai]]
         u = dot(V, s)
@@ -57,11 +59,12 @@ def davidsolver(A, guess, iterations, eps):
 
 
 def davidinit(A, guess):
+    iterations = len(guess)
     V = guess / norm(guess)
     theta = dot(V.T, dot(A, V))
     M = theta
     r = dot(A, V) - theta * V
-    return V, M, theta, r
+    return V, M, theta, r, iterations
 
 
 def solvecorrectioneq(A, u, theta, r, n):
@@ -84,13 +87,13 @@ def solvecorrectioneq(A, u, theta, r, n):
 
 def modgramshmidt(tin, V, kappah=0.25):
     t = tin
-<<<<<<< HEAD
-    if len(V.shape) == 1 or len(V[0,:]) == 1:
-        t = t - dot(t, V) * V
-=======
+
+    #if len(V.shape) == 1 or len(V[0,:]) == 1:
+     #   t = t - dot(t, V) * V
+
     if len(V[1]) == 1:
         t = t - dot(t.T, V) * V
->>>>>>> 07f9794a722db6f03e5f430a816f53f2a1c68914
+
     else:
         for j in range(len(V.T)):
             # print "dot(t.T, V[:, [j]]): ", dot(t.T, V[:, [j]])
@@ -103,9 +106,9 @@ def modgramshmidt(tin, V, kappah=0.25):
 
 
 def davidsontest():
-    k = 100                     # Matrix size
+    k = 5                     # Matrix size
     TOL = 1.e-3                 # Margin of error
-    D = 100                     # Diagonal shape
+    D = 5                     # Diagonal shape
     N = 45                      # Iterations
 
     A = realsymmetric(k, D)
@@ -116,13 +119,13 @@ def davidsontest():
     #               [5, 6, 7, -8, 9]])
     eig, vec = np.linalg.eig(A)
     Eig = np.sort(eig)
-    target = 18 # = eig.argmax()
+    target = 3 # = eig.argmax()
     eigmax = eig[target]
     vmax = vec[:, [target]]
 
     # guess = np.random.rand(k, 1)
     # guess = np.ones((k, 1))
-    guess = vmax + 0.10 * np.ones((k, 1))
+    guess = vmax + 0.07 * np.ones((k, 1))
     guess = guess / norm(guess)
     print "Matrix size:", k
     print "Target eigenvalue:", eigmax
