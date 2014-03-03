@@ -3,6 +3,9 @@ from matrix import matrixgen
 from power import powersolve
 from jacobi_iteration import jacobi_eigensolver
 from davidson import davidsolver
+from jacobi_iteration import jacobi_rot
+from JOCC import JOCC
+import timeit
 '''
 This script is old and should be phased out. Any testing should be done as
 a separeate script in each method file.
@@ -29,6 +32,24 @@ A = matrixgen(k, D)
 
 eig, vec = np.linalg.eig(A)
 Eig = np.sort(eig)
+
+
+
+print "Computed eigenvalues using eig"
+print Eig[0]
+
+guess = vec[1, :] + 0.1 * vec[2, :] + 0.2 * vec[3, :]
+theta, u = davidsolver(A, guess, N, TOL)
+
+
+print "Computed largest eigenpair using davidsolver:"
+print "Eigenvalue = ", theta
+print "Eigenvector:"
+print u
+
+print "Computed eigenvectors using eig"
+print vec
+
 
 
 guess = vec[1, :] + 0.1 * vec[2, :] + 0.2 * vec[3, :]

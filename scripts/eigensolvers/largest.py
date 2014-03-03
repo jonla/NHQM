@@ -16,7 +16,12 @@ def largestEig(A, its = 100, tol = 10**-10):
 
     theta = dot(v.T, (dot(A, v)))
 
+    
     return theta, v
+
+
+
+    
 
 
 def testlargestEig():
@@ -31,3 +36,4 @@ def testlargestEig():
 
     print "largestEig: ", theta
     print "linalg.eig: ", Eig[k-1]
+
