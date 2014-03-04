@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import dot
+import matplotlib.pyplot as plt
 # from largest import largestEig
 from numpy.linalg import norm
 from matrix import realsymmetric, complexsymmetric, complexhermitian
@@ -21,7 +22,7 @@ def davidsolver(A, guess, iterations, eps):
     timeCEQ = 0
 
     V, M, theta, r, iterations = davidinit(A, guess)
-    
+
     theta1 = theta
     n = len(A)
     u = V
@@ -33,7 +34,7 @@ def davidsolver(A, guess, iterations, eps):
         M = np.vstack([np.hstack([M, dot(V.T, dot(A, vplus))]),
                        np.hstack([dot(vplus.T, dot(A, V)),
                                   dot(vplus.T, dot(A, vplus))])])
-        
+
         V = np.hstack((V, vplus))
         '''
         We need to implement a better/faster method than power
@@ -127,7 +128,7 @@ def davidsontest():
     #               [5, 6, 7, -8, 9]])
     eig, vec = np.linalg.eig(A)
     Eig = np.sort(eig)
-    target = 3 # = eig.argmax()
+    target = 18  # = eig.argmax()
     eigmax = eig[target]
     vmax = vec[:, [target]]
 
@@ -149,7 +150,7 @@ def davidsontest():
     print "RESULTING EIGENVALUE:", theta
     neari = abs(eig - theta1).argmin()
     neareig = eig[neari]
-    nearvec = vec[:,[neari]]
+    nearvec = vec[:, [neari]]
     print "Nearest eigenvalue to Theta 1:", neareig
     print "Guess*nearest:", dot(nearvec.T, guess)
     print "Computed smallest and largest using eig:"
