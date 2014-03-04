@@ -86,6 +86,23 @@ def solvecorrectioneq(A, u, theta, r, n):
                                             np.eye(n) - np.outer(u, u)))
     K = np.vstack([K, 100 * u.T])   # lstsq weight 100 for u * t = 0
     t = np.linalg.lstsq(K, np.vstack([-r, 0]))[0]
+
+    # K = A - theta * np.eye(n)
+    # Kinv = np.linalg.inv(K)
+    # Ktilde = dot(np.eye(n) - np.outer(u, u), dot(K,
+    #                                          np.eye(n) - np.outer(u, u)))
+    # uhat = dot(Kinv, u)
+    # mu = dot(u.T, uhat)
+    # rhat = dot(Kinv, r)
+    # rtilde = rhat - dot(u.T,rhat) / mu * uhat
+
+    # # Here we should apply the Krylov sover GMRES:
+    # v = np.linalg.solve(dot(np.linalg.inv(Ktilde), A), -r)
+
+    # y = dot(A - theta * np.eye(n), v)
+    # yhat = dot(Kinv, y)
+    # z = yhat - dot(u, yhat) / mu * uhat
+    # Normalized z -> t ?
     return t
 
 
