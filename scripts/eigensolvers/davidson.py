@@ -3,7 +3,7 @@ from numpy import dot
 import matplotlib.pyplot as plt
 # from largest import largestEig
 from numpy.linalg import norm
-from matrix import realsymmetric, complexsymmetric, complexhermitian
+from matrix import *
 import time
 
 
@@ -23,7 +23,7 @@ def davidsolver(A, guess, iterations, eps):
 
     V, M, theta, r, iterations = davidinit(A, guess)
 
-    theta1 = theta
+    # theta1 = theta
     n = len(A)
     u = V
     for m in range(iterations):
@@ -43,11 +43,9 @@ def davidsolver(A, guess, iterations, eps):
         # theta, s = largestEig(M, 100)
         evals, evecs = np.linalg.eig(M)
 
-        #thetai = abs(evals - theta1).argmin()
-        thetai = evals.argmax()
-
         # thetai = abs(evals - theta1).argmin()
-        thetai = abs(evals).argmax()
+        # thetai = abs(evals).argmax()
+        thetai = abs(evecs[0, :]).argmax()
 
         theta = evals[thetai]
         s = evecs[:, [thetai]]
@@ -109,48 +107,41 @@ def modgramshmidt(tin, V, kappah=0.25):
     return t / norm(t)
 
 
-def davidsontest():
+def davidsontest(k=100, TOL=1.e-3, N=45, hermitian=True, real=True,
+                 target=18, guessoffset=0.15):
 
-    k = 5                     # Matrix size
+    # k = 100                     # Matrix size
+    # TOL = 1.e-3                 # Margin of error
+    D = 1000                     # Diagonal shape
+    # N = 45                      # Iterations
 
-    k = 500                     # Matrix size
+    if hermitian:
+        A = realsymmetric(k, D) if real else complexhermitian(k, d)
+    else:
+        A = complexsymmetric(k, D)
 
-    TOL = 1.e-3                 # Margin of error
-    D = 5                     # Diagonal shape
-    N = 45                      # Iterations
-    guessoffset = 0.035
-
-    A = realsymmetric(k, D)
-    # A = np.array([[1, 2, -3, 4, 5],
-    #               [2, 3, 4, 5, 6],
-    #               [-3, 4, 5, -6, 7],
-    #               [4, 5, -6, 7, -8],
-    #               [5, 6, 7, -8, 9]])
     eig, vec = np.linalg.eig(A)
     Eig = np.sort(eig)
-    target = 18  # = eig.argmax()
-    eigmax = eig[target]
-    vmax = vec[:, [target]]
+    # target = 18  # = eig.argmax()
+    eigtarget = eig[target]
+    vtarget = vec[:, [target]]
 
     # guess = np.random.rand(k, 1)
     # guess = np.ones((k, 1))
 
-    guess = vmax + 0.07 * np.ones((k, 1))
-
-    guess = vmax + guessoffset * np.ones((k, 1))
-
+    guess = vtarget + guessoffset * np.ones((k, 1))
     guess = guess / norm(guess)
-    print "Matrix size:", k
-    print "Target eigenvalue:", eigmax
-    print "Guess'*Vmax:", dot(guess.T, vmax)
     theta1 = dot(guess.T, dot(A, guess))
+    print "Matrix size:", k
+    print "Target eigenvalue:", eigtarget
+    print "Guess'*Vtarget:", dot(guess.T, vtarget)
     print "Theta 1:", theta1
-    theta, u = davidsolver(A, guess, N, TOL)
 
-    print "RESULTING EIGENVALUE:", theta
+    theta, u = davidsolver(A, guess, N, TOL)
     neari = abs(eig - theta1).argmin()
     neareig = eig[neari]
     nearvec = vec[:, [neari]]
+    print "RESULTING EIGENVALUE:", theta
     print "Nearest eigenvalue to Theta 1:", neareig
     print "Guess*nearest:", dot(nearvec.T, guess)
     print "Computed smallest and largest using eig:"
