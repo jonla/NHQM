@@ -3,7 +3,7 @@
 
 
 
-function [lambda, e, res_hist, theta_approximations, count, V]=JD(A,guess)
+function [lambda, e, res_hist, theta_approximations, count, V]=JDgminres(A,guess)
 
 %%% INITIALIZE:   Sets tolerance levels for convergence,
 %%%              weight for the orthogonality of u to t,
@@ -12,7 +12,7 @@ function [lambda, e, res_hist, theta_approximations, count, V]=JD(A,guess)
 %%%               variables.
 tol=10000;
 tol2=0.00000001;
-weight=1;
+weight=1000;
 count=0;
 iterations=length(guess);
 I=eye(length(guess));
@@ -72,22 +72,19 @@ for k=1:iterations
         % guided correction               
         
         OCC=((I-u*u')*(A-theta_init*I)*(I-u*u'));
-        %OCC_constrained=[OCC; weight*u'];
-        %res_conc=[res; 0];
-        t=OCC\-res;
+        
+        
+        
         orthogonal_check=u'*t;   
                
     else if norm(res) > tol2
-            
+            K = diag(diag(A));
             % orthogonal completion correction
-            
-            OCC=((I-u*u')*(A-theta*I)*(I-u*u'));
-            OCC_constrained=[OCC; weight*u'];
-            res_conc=[-res; 0];
             tStart = tic;
-            t=mldivide(OCC_constrained,res_conc);
-            mld_time = toc(tStart)
-            orthogonal_check=u'*t;
+            %OCC=((I-u*u')*(A-theta*I)*(I-u*u'));
+            t = gmres(A,-res,5,0.01,50,K);
+            gmres_time = toc(tStart)
+            %orthogonal_check=u'*t;
             
         else
             % Returns
