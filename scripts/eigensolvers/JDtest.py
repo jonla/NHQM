@@ -8,7 +8,7 @@ Created on 27 feb 2014
 import numpy as np
 from Jacobi_Davidson import *
 from matrix import *
-
+from JD_guided import *
 
 
 '''
@@ -21,9 +21,9 @@ ISSUES: Less accurate than the matlab version, can't tell why.
 
 
 
-matrix_size = 100 
-which_state = 80
-error_size = 0.08
+matrix_size = 500
+which_state = 300
+error_size = 0.05
 print "Target eigenpair:", which_state
 
 A = realsymmetric(matrix_size,matrix_size)
@@ -36,9 +36,10 @@ sought_state = vec[:,[which_state]]
 sought_value = eig[which_state]
 error = error_size*np.ones((matrix_size,1))
 guess = sought_state+error
+guess=guess/np.linalg.norm(guess)
 guess_acc = abs(np.dot(np.transpose(sought_state),guess))
 print "Guess accuracy:", guess_acc
-
+print "REGULAR JACOBI DAVIDSON:"
 '''Runs JD'''
 theta, e, theta_hist, res_hist, count = JD(A,guess,"state")
 print "Completed iterations:", count
@@ -52,6 +53,7 @@ max_overlap_ind = np.argmax(overlap)
 found_overlap = vec[:,[max_overlap_ind]]
 print "Found state has largest overlap with eigenvector", max_overlap_ind
 print "Overlap:", overlap[max_overlap_ind,0]
+
     
 
 
@@ -67,3 +69,6 @@ plt.plot(e, label="Found state")
 plt.plot(sought_state, label="Desired state", color="red")
 plt.legend()
 plt.show()
+
+
+

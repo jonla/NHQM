@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def JD(A,v0,search,tol=0.001):
+def JD(A,v0,search,tol=0.00001):
     
     '''
     Finds eigenpair for a matrix A with an initial guess v0. 
@@ -109,7 +109,7 @@ def JD(A,v0,search,tol=0.001):
         theta_hist[i+1] = theta
         res_hist[i+1] = np.log10(np.linalg.norm(res))
         count=count+1
-        
+        print "Count:", count
         
         
         
@@ -126,7 +126,7 @@ def initialize(A,v0):
     
     
     res = np.dot(A,V)-theta*V
-    M=theta       
+    M=theta      
     iterations=len(v0)
     
     return theta, V, M, res, iterations
@@ -146,6 +146,8 @@ def closest_eig(M,init_theta):
     closest_vec = vec_M[:,[ind]]
     
     return closest_eig, closest_vec
+
+
 def largest_eig(M):
     eig_M, vec_M = np.linalg.eig(M)
     ind = np.argmax(eig_M)
@@ -158,7 +160,7 @@ def largest_overlap(M,k):
     eig_M, vec_M = np.linalg.eig(M)
     overlap = np.zeros((k+1,1))
     for j in range(k+1):
-        overlap[j] = vec_M[1,j]
+        overlap[j] = vec_M[0,j]
         
     ind = np.argmax(abs(overlap))
     overlap_eig = eig_M[ind]
@@ -173,13 +175,10 @@ def OCC_solve(A,u,theta,res,weight=100):
     
     
     OCC=np.dot((I-np.dot(u,np.transpose(u))),np.dot((A-theta*I),(I-np.dot(u,np.transpose(u)))));
-     
-       
+           
     OCC_constrained=np.vstack((OCC, weight*np.transpose(u)));
-    
     res_conc=np.vstack((res,0))
-    
-        
+            
     x=np.linalg.lstsq(OCC_constrained,-res_conc);
     t=x[0]
     
